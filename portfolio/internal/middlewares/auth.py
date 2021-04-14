@@ -52,7 +52,7 @@ def required_auth_with_unconfirmed_email(func):
 
 
 def required_auth_with_confirmed_email(func):
-    async def wrapper(request, *args, **kwargs):
+    def wrapper(*args, **kwargs):
         if not request.headers.get('auth-token'):
             return "Где токен?"
 
@@ -70,7 +70,7 @@ def required_auth_with_confirmed_email(func):
         if not account_main.is_confirmed:
             return "Пожалуйста, подтвердите email"
 
-        response = func(request, *args, auth_account_main_id=account_main.id, **kwargs)
+        response = func(*args, auth_account_main_id=account_main.id, **kwargs)
         return response
     wrapper.__name__ = func.__name__
     return wrapper

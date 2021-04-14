@@ -3,6 +3,7 @@ from portfolio.models.parents import Parents
 
 SER_FOR_ADD_PARENTS = 'ser-for-add-parents'
 SER_FOR_EDIT_PARENTS = 'ser-for-edit-parents'
+SER_FOR_DELETE_PARENTS = 'ser-for-delete-parents'
 
 
 class ParentsSerializer(BaseSerializer):
@@ -13,6 +14,8 @@ class ParentsSerializer(BaseSerializer):
             return cls._ser_for_add_parents
         elif format_ser == SER_FOR_EDIT_PARENTS:
             return cls._ser_for_edit_parents
+        elif format_ser == SER_FOR_DELETE_PARENTS:
+            return cls._ser_for_delete_parents
         else:
             raise TypeError
 
@@ -35,4 +38,10 @@ class ParentsSerializer(BaseSerializer):
             'name': parents.name,
             'surname': parents.surname,
             'account_main_id': parents.account_main.id
+        }
+
+    @staticmethod
+    def _ser_for_delete_parents(parents: Parents):
+        return {
+            'id': parents.id
         }

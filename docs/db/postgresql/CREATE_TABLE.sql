@@ -93,7 +93,6 @@ CREATE TABLE children(
     id SMALLINT PRIMARY KEY DEFAULT nextval('children_id_seq'),
     created_at TIMESTAMP with time zone NOT NULL DEFAULT current_timestamp,
     edited_at TIMESTAMP with time zone NOT NULL DEFAULT current_timestamp,
-    account_main_id INTEGER REFERENCES account_main(id) ON DELETE CASCADE,
     parents_id INTEGER REFERENCES parents(id) ON DELETE CASCADE,
     name VARCHAR(150) NOT NULL,
     surname VARCHAR(150) NOT NULL,
