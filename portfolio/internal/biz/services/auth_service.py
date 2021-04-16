@@ -72,6 +72,7 @@ class AuthService:
 
     @staticmethod
     def _add_account_main_and_create_session(account_main: AccountMain):
+        print('GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
         account_main, errors = AccountMainDao().add(account_main)
         if errors:
             return None, errors

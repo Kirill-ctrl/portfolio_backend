@@ -157,6 +157,8 @@ class AccountMainDao(BaseDao):
                  WHERE
                      account_main.id = %s"""
         with self.pool.getconn() as conn:
+            if self.conn:
+                conn = self.conn
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
                 cur.execute(sql, (auth_account_main_id,))
                 row = cur.fetchone()
@@ -164,7 +166,7 @@ class AccountMainDao(BaseDao):
             self.pool.putconn(conn)
             account_email = row['account_main']
             if not account_email:
-                return None, None
+                return None, "Интересно..."
 
             return AccountMain(email=account_email), None
 

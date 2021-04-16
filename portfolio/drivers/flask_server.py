@@ -12,6 +12,11 @@ class FlaskServer:
         return cls._app
 
     @classmethod
+    def set_config(cls, upload_folder: str, max_content_length: int):
+        cls._app.config['UPLOAD_FOLDER'] = upload_folder
+        cls._app.config['MAX_CONTENT_LENGTH'] = max_content_length
+
+    @classmethod
     def set_api(cls, apis: List[Blueprint] or Blueprint):
         for api in apis:
             print(api.name)

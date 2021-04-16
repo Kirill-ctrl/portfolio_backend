@@ -33,9 +33,17 @@ class Children(AbstractModel):
     def name(self) -> str:
         return self.__name
 
+    @name.setter
+    def name(self, value: str):
+        self.__name = value
+
     @property
     def surname(self) -> str:
         return self.__surname
+
+    @surname.setter
+    def surname(self, value):
+        self.__surname = value
 
     @property
     def date_born(self) -> date:

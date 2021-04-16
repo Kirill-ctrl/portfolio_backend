@@ -1,14 +1,6 @@
-from datetime import date
-
 from marshmallow import Schema, fields
 
-
-def date_validate(value):
-    print(value)
-    try:
-        date.fromisoformat(str(value))
-    except:
-        raise TypeError("некорректная дата")
+from portfolio.internal.biz.validators.utils import date_validate
 
 
 class AddChildSchema(Schema):

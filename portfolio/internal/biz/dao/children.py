@@ -1,6 +1,8 @@
 from psycopg2 import extras
 
 from portfolio.internal.biz.dao.base_dao import BaseDao
+from portfolio.internal.biz.deserializers.children import ChildrenDeserialize, DES_FROM_DB_INFO_CHILD, \
+    DES_FROM_DB_ALL_CHILDREN, DES_FROM_DB_INFO_CHILD_WITH_PARENTS
 from portfolio.models.children import Children
 
 
@@ -23,3 +25,73 @@ class ChildrenDao(BaseDao):
             children.created_at = row['created_at']
             children.edited_at = row['edited_at']
             return children, None
+
+    def get_by_parents_id(self, children: Children):
+        sql = """   SELECT 
+                        children.id         AS children_id,
+                        children.name       AS children_name,
+                        children.surname    AS children_surname,
+                        children.date_born  AS children_date_born,
+                        parents.id          AS parents_id,
+                        parents.name        AS parents_name,
+                        parents.surname     AS parents_surname
+                    FROM
+                        children
+                    INNER JOIN 
+                        parents ON parents.id = children.parents_id
+                    WHERE
+                        parents.id = %s AND children.name = %s"""
+        with self.pool.getconn() as conn:
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql, (children.parents.id, children.name))
+                row = cur.fetchone()
+                cur.close()
+            self.pool.putconn(conn)
+            if not row:
+                return None, "Сначала добавьте ребенка"
+            return ChildrenDeserialize.deserialize(row, DES_FROM_DB_INFO_CHILD), None
+
+    def get_all_by_parents_id(self, children: Children):
+        sql = """   SELECT
+                        id          AS children_id,
+                        name        AS children_name,
+                        surname     AS children_surname,
+                        date_born   AS children_date_born,
+                        parents_id  AS children_parents_id
+                    FROM 
+                        children
+                    WHERE
+                        children.parents_id = %s"""
+        with self.pool.getconn() as conn:
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql, (children.parents.id,))
+                data = cur.fetchall()
+                cur.close()
+            self.pool.putconn(conn)
+        if not data:
+            return None, "Сначала добавьте детей"
+        return ChildrenDeserialize.deserialize(data, DES_FROM_DB_ALL_CHILDREN)
+
+    def get_by_request_id(self, request_id):
+        sql = """   SELECT
+                        id                          AS children_id,
+                        name                        AS children_name,
+                        surname                     AS children_surname,
+                        date_born                   AS children_date_born,
+                        parents_id                  AS children_parents_id,
+                        parents.account_main_id     AS parents_account_main_id
+                    FROM
+                        children
+                    INNER JOIN 
+                        partners ON partners.id = children.id
+                    INNER JOIN
+                        request_to_organisation ON request_to_organisation.parents_id = partners.id
+                    WHERE
+                        request_id = %s"""
+        with self.conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+            cur.execute(sql, (request_id,))
+            row = cur.fetchone()
+            cur.close()
+        if not row:
+            return None, "Такого запроса не существует"
+        return ChildrenDeserialize.deserialize(row, DES_FROM_DB_INFO_CHILD_WITH_PARENTS), None

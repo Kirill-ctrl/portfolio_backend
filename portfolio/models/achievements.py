@@ -11,10 +11,12 @@ class Achievements(AbstractModel):
                  created_at: Optional[datetime] = None,
                  edited_at: Optional[datetime] = None,
                  events: Optional[Events] = None,
+                 name: Optional[str] = None,
                  point: Optional[int] = None,
                  nomination: Optional[str] = None) -> None:
         super().__init__(id=id, created_at=created_at, edited_at=edited_at)
         self.__events = events
+        self.__name = name
         self.__point = point
         self.__nomination = nomination
 
@@ -29,3 +31,7 @@ class Achievements(AbstractModel):
     @property
     def nomination(self) -> str:
         return self.__nomination
+
+    @property
+    def name(self) -> str:
+        return self.__name

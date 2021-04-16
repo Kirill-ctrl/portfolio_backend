@@ -10,3 +10,17 @@ class ChildrenService:
         if err:
             return None, err
         return children, None
+
+    @staticmethod
+    def get_child(children: Children):
+        children, err = ChildrenDao().get_by_parents_id(children)
+        if err:
+            return None, err
+        return children, None
+
+    @staticmethod
+    def get_children_by_parents_id(children: Children):
+        list_children, err = ChildrenDao().get_all_by_parents_id(children)
+        if err:
+            return None, err
+        return list_children, None

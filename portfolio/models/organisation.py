@@ -26,6 +26,10 @@ class Organisation(AbstractModel):
     def account_main(self) -> AccountMain:
         return self.__account_main
 
+    @account_main.setter
+    def account_main(self, value: AccountMain):
+        self.__account_main = value
+
     @property
     def name(self) -> str:
         return self.__name

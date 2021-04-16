@@ -1,4 +1,5 @@
-from psycopg2 import extras, sql
+import psycopg2
+from psycopg2 import extras, sql, errorcodes
 
 from portfolio.internal.biz.dao.base_dao import BaseDao
 from portfolio.models.account_main import AccountMain
@@ -13,10 +14,16 @@ class ParentsDao(BaseDao):
                     RETURNING id, created_at, edited_at;"""
         with self.pool.getconn() as conn:
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-                cur.execute(sql, (parents.name, parents.surname, parents.account_main.id))
-                row = cur.fetchone()
-                cur.close()
-                conn.commit()
+                try:
+                    cur.execute(sql, (parents.name, parents.surname, parents.account_main.id))
+                    row = cur.fetchone()
+                    cur.close()
+                    conn.commit()
+                except psycopg2.IntegrityError as err:
+                    if err.pgcode == errorcodes.UNIQUE_VIOLATION:
+                        return None, "Этот родитель уже создан"
+                    else:
+                        raise TypeError
             self.pool.putconn(conn)
             parents.id = row['id']
             parents.created_at = row['created_at']
@@ -34,8 +41,8 @@ class ParentsDao(BaseDao):
                     WHERE 
                         account_main_id = {account_main_id}
                     RETURNING id, edited_at;""").format(name_field=sql.Identifier(parents.name),
-                                             surname_field=sql.Identifier(parents.surname),
-                                             account_main_id=sql.Identifier(parents.account_main.id))
+                                                        surname_field=sql.Identifier(parents.surname),
+                                                        account_main_id=sql.Identifier(parents.account_main.id))
         with self.pool.getconn() as conn:
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
                 cur.execute(query)

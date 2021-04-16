@@ -2,9 +2,6 @@ import hashlib
 from datetime import datetime
 from typing import Optional
 
-from werkzeug.security import generate_password_hash
-
-from portfolio.internal.biz.services.utils import get_temp_password
 from portfolio.models.abstract_model import AbstractModel
 
 
