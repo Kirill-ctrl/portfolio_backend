@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from psycopg2 import extras
 
 from portfolio.internal.biz.dao.base_dao import BaseDao
@@ -46,3 +48,35 @@ class ChildrenOrganisationDao(BaseDao):
         if not data:
             return None, "У вас нет обучающихся"
         return ChildrenOrganisationDeserializer.deserialize(data, DES_FROM_DB_GET_ALL_LEARNERS), None
+
+    def get_statistic_by_sort_date(self, result_sort_statistic: datetime.date, children_id: int):
+        sql = """   SELECT
+                        SUM(events.hours)   AS      sum_hours,
+                        events.skill        AS      events_skill
+                    FROM
+                        children_organisation
+                    INNER JOIN
+                        events_child ON events_child.children_organisation_id = children_organisation.id
+                    INNER JOIN
+                        events ON events_child.events_id = events.id
+                    WHERE
+                        events_child.status = true AND children_organisation.children_id = %s AND events.date_event > %s
+                    GROUP BY
+                        events.skill 
+                    ORDER BY
+                        sum_hours"""
+        with self.pool.getconn() as conn:
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql, (children_id,
+                                  result_sort_statistic))
+                data = cur.fetchall()
+            self.pool.putconn(conn)
+        if not data:
+            return None, 'Статистики нет'
+        return {
+            'skills': {
+                'skill': data[i]['events_skill'],
+                'sum_hours': data[i]['sum_hours']
+            }
+            for i in range(len(data))
+        }

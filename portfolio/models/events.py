@@ -14,12 +14,14 @@ class Events(AbstractModel):
                  name: Optional[str] = None,
                  date_event: Optional[date] = None,
                  hours: Optional[int] = None,
+                 skill: Optional[str] = None,
                  organisation: Optional[Organisation] = None):
         super().__init__(id=id, created_at=created_at, edited_at=edited_at)
         self.__type = type
         self.__name = name
         self.__date_event = date_event
         self.__hours = hours
+        self.__skill = skill
         self.__organisation = organisation
 
     @property
@@ -37,6 +39,10 @@ class Events(AbstractModel):
     @property
     def hours(self) -> int:
         return self.__hours
+
+    @property
+    def skill(self) -> str:
+        return self.__skill
 
     @property
     def organisation(self) -> Organisation:

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from psycopg2 import extras
 
 from portfolio.internal.biz.dao.base_dao import BaseDao
@@ -9,12 +11,12 @@ from portfolio.models.events import Events
 class EventsDao(BaseDao):
 
     def add(self, event: Events):
-        sql = """   INSERT INTO events(type, name, date_event, hours, organisation_id) VALUES
-                    (%s, %s, %s, %s, %s)
+        sql = """   INSERT INTO events(type, name, date_event, hours, skill, organisation_id) VALUES
+                    (%s, %s, %s, %s, %s,%s)
                     RETURNING id, created_at, edited_at;"""
         with self.pool.getconn() as conn:
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-                cur.execute(sql, (event.type, event.name, event.date_event, event.hours, event.organisation.id))
+                cur.execute(sql, (event.type, event.name, event.date_event, event.hours, event.skill,event.organisation.id))
                 row = cur.fetchone()
                 cur.close()
                 conn.commit()
@@ -31,6 +33,7 @@ class EventsDao(BaseDao):
                         name                AS events_name,
                         date_event          AS events_date_event,
                         hours               AS events_hours,
+                        skill               AS events_skill,
                         organisation_id     AS events_organisation_id
                     FROM
                         events
@@ -53,6 +56,7 @@ class EventsDao(BaseDao):
                         name                AS events_name,
                         date_event          AS events_date_event,
                         hours               AS events_hours,
+                        skill               AS events_skill,
                         organisation_id     AS events_organisation_id
                     FROM
                         events
@@ -67,3 +71,50 @@ class EventsDao(BaseDao):
         if not row:
             return None, "Данное событие не существует"
         return EventDeserializer.deserialize(row, DES_FROM_DB_GET_DETAIL_EVENT)
+
+    def get_focus_by_sort_date(self, result_sort_focus: datetime.date, children_id: int):
+        sql = """   SELECT
+                        SUM(events.hours)   AS sum_events_hours,
+                        events.skill        AS events_skill
+                    FROM
+                        events
+                    INNER JOIN 
+                        events_child ON events_child.events_id = events.id
+                    INNER JOIN
+                        children_organisation ON children_organisation.id = events_child.children_organisation_id
+                    WHERE
+                        children_organisation.children_id = %s AND events_child.status = true AND events.date_event > %s
+                    GROUP BY
+                        events.skill
+                    ORDER BY
+                        sum_events_hours DESC;"""
+        with self.pool.getconn() as conn:
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql, (children_id,
+                                  result_sort_focus))
+                row = cur.fetchone()[0]
+                cur.close()
+            self.pool.putconn(conn)
+        if not row:
+            return None, "Статистики нет"
+        return {
+            'skill': row['events_skill'],
+            'focus_hours': row['sum_events_hours']
+        }
+
+    def get_id_by_name(self, events_name: str):
+        sql = """   SELECT 
+                        id   AS events_id
+                    FROM
+                        events
+                    WHERE
+                        events.name = %s"""
+        with self.pool.getconn() as conn:
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql, (events_name,))
+                row = cur.fetchone()
+                cur.close()
+            self.pool.putconn(conn)
+        if not row:
+            return None, "События с таким именем не существует"
+        return Events(id=row['events_id']), None

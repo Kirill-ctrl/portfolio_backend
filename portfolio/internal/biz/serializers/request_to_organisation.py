@@ -55,7 +55,7 @@ class RequestToOrganisationSerializer(BaseSerializer):
                         'events': {
                             'id': list_request_to_organisation[i].events.id,
                             'name': list_request_to_organisation[i].events.name,
-                            'surname': list_request_to_organisation[i].events.date_event
+                            'date_event': list_request_to_organisation[i].events.date_event
                         },
                         'children': {
                             'id': list_request_to_organisation[i].children.id,

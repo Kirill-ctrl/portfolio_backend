@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import psycopg2
 from psycopg2 import extras, errorcodes, sql
 
@@ -129,7 +131,7 @@ class OrganisationDao(BaseDao):
                 cur.close()
             self.pool.putconn(conn)
         if not data:
-            return None, "Компания на ваше имя не зарегистрирована"
+            return None, "Учителей нет"
         return TeacherDeserializer.deserialize(data, DES_FROM_DB_DETAIL_TEACHER), None
 
     def get_all(self):
@@ -171,3 +173,20 @@ class OrganisationDao(BaseDao):
         if not row:
             return None, "Такой компании не существует"
         return OrganisationDeserializer.deserialize(row, DES_FROM_DB_GET_ORGANISATION)
+
+    def get_id_by_org_name(self, organisation_name: str):
+        sql = """   SELECT 
+                        id              AS organisation_id
+                    FROM
+                        organisation
+                    WHERE
+                        organisation.name = %s"""
+        with self.pool.getconn() as conn:
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql, (organisation_name,))
+                row = cur.fetchone()
+                cur.close()
+            self.pool.putconn(conn)
+        if not row:
+            return None, "Такой компании не существует"
+        return Organisation(id=row['organisation_id']), None

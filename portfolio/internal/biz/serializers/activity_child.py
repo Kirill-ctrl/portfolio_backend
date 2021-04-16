@@ -35,7 +35,8 @@ class ActivityChildSerializer(BaseSerializer):
                         'type': activity_child.list_events_child[i].events.type,
                         'name': activity_child.list_events_child[i].events.name,
                         'date_event': activity_child.list_events_child[i].events.date_event,
-                        'hours': activity_child.list_events_child[i].events.hours
+                        'hours': activity_child.list_events_child[i].events.hours,
+                        'skill': activity_child.list_events_child[i].events.skill
                     },
                     'children_organisation': {
                         activity_child.list_events_child[i].children_organisation.id

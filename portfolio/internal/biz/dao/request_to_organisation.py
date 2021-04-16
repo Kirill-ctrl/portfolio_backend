@@ -28,6 +28,7 @@ class RequestToOrganisationDao(BaseDao):
                                   request_to_organisation.children.id))
                 row = cur.fetchone()
                 cur.close()
+            conn.commit()
             self.pool.putconn(conn)
         if not row:
             return None, "МДААААА"
@@ -40,31 +41,24 @@ class RequestToOrganisationDao(BaseDao):
         sql = """   SELECT
                         events.organisation_id              AS events_organisation_id,
                         request_to_organisation.id          AS request_id,
-                        request_to_organisation.parents_id  AS request_parents_id,
-                        request_to_organisation.events_id   AS request_events_id,
                         request_to_organisation.children_id AS request_children_id,
                         request_to_organisation.status      AS request_status,
                         events.id                           AS events_id,
                         events.name                         AS events_name,
                         events.date_event                   AS events_date_event,
-                        parents.id                          AS parents_id
+                        parents.id                          AS parents_id,
                         parents.name                        AS parents_name,
-                        parents.surname                     AS parents_surname,
-                        children.id                         AS children_id,
-                        children.name                       AS children_name,
-                        children.surname                    AS children_surname
+                        parents.surname                     AS parents_surname
                     FROM
                         request_to_organisation
                     INNER JOIN 
                         events ON request_to_organisation.events_id = events.id
                     INNER JOIN
                         parents ON request_to_organisation.parents_id = parents.id
-                    INNER JOIN 
-                        children ON children.parents_id = parents.id
                     WHERE
                         events.organisation_id = %s
                     ORDER BY 
-                        events.id
+                        request_to_organisation.children_id
                     """
         with self.pool.getconn() as conn:
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:

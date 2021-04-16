@@ -60,7 +60,7 @@ class ChildrenDeserialize(BaseDeserializer):
                 surname=list_children[i]['children_surname'],
                 date_born=list_children[i]['children_date_born'],
                 parents=Parents(
-                    id=list_children[i]['children_']
+                    id=list_children[i]['parents_id']
                 )
             )
             for i in range(len(list_children))

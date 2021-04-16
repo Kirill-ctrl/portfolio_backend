@@ -31,6 +31,7 @@ class EventsSerializer(BaseSerializer):
             'name': event.name,
             'date_event': event.date_event,
             'hours': event.hours,
+            'skill': event.skill,
             'organisation': {
                 'id': event.organisation.id
             }
@@ -48,7 +49,8 @@ class EventsSerializer(BaseSerializer):
                     'type': list_events[i].type,
                     'name': list_events[i].name,
                     'date_event': list_events[i].date_event,
-                    'hours': list_events[i].hours
+                    'hours': list_events[i].hours,
+                    'skill': list_events[i].skill
                 }
                 for i in range(len(list_events))
             ]
@@ -64,7 +66,8 @@ class EventsSerializer(BaseSerializer):
                 'id': event.id,
                 'type': event.type,
                 'name': event.name,
-                'date_event':event.date_event,
-                'hours': event.hours
+                'date_event': event.date_event,
+                'hours': event.hours,
+                'skill': event.skill
             }
         }

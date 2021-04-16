@@ -28,7 +28,7 @@ class RequestToOrganisationDeserializer(BaseDeserializer):
                 id=data[i]['request_id'],
                 parents=ParentsDeserializer.deserialize(data[i], DES_FROM_DB_INFO_PARENTS),
                 events=EventDeserializer.deserialize(data[i], DES_FROM_DB_INFO_EVENTS),
-                children=ChildrenDeserialize.deserialize(data[i], DES_FROM_DB_INFO_CHILDREN),
+                children=Children(id=data[i]['request_children_id']),
                 status=data[i]['request_status']
             )
             for i in range(len(data))

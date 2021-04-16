@@ -59,6 +59,7 @@ class EventsChildDao(BaseDao):
                         events.name                         AS events_name,
                         events.date_event                   AS events_date_event,
                         events.hours                        AS events_hours,
+                        events.skill                        AS events_skill,
                         children_organisation.id            AS children_organisation_id,
                         children_organisation.children_id   AS children_id,
                         children.name                       AS children_name,

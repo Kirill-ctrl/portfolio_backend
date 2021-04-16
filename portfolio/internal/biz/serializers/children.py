@@ -1,9 +1,12 @@
+from typing import List
+
 from portfolio.internal.biz.serializers.base_serializer import BaseSerializer
 from portfolio.internal.biz.serializers.parents import ParentsSerializer
 from portfolio.models.children import Children
 
 SER_FOR_ADD_CHILD = 'ser-for-add-child'
 SER_FOR_DETAIL_CHILD = 'ser-for-detail-child'
+SER_FOR_GET_LIST_CHILDREN = 'ser-for-get-list-children'
 
 
 class ChildrenSerializer(BaseSerializer):
@@ -14,6 +17,8 @@ class ChildrenSerializer(BaseSerializer):
             return cls._ser_for_add_child
         elif format_ser == SER_FOR_DETAIL_CHILD:
             return cls._ser_for_detail_child
+        elif format_ser == SER_FOR_GET_LIST_CHILDREN:
+            return cls._ser_for_get_list_children
         else:
             raise TypeError
 
@@ -38,4 +43,21 @@ class ChildrenSerializer(BaseSerializer):
             'name': children.name,
             'surname': children.surname,
             'date_born': children.date_born
+        }
+
+    @staticmethod
+    def _ser_for_get_list_children(list_children: List[Children]) -> dict:
+        return {
+            'parents': {
+                'id': list_children[0].parents.id
+            },
+            'children': [
+                {
+                    'id': list_children[i].id,
+                    'name': list_children[i].name,
+                    'surname': list_children[i].surname,
+                    'date_born': list_children[i].date_born,
+                }
+                for i in range(len(list_children))
+            ]
         }

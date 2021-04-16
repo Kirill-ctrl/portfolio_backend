@@ -24,3 +24,10 @@ class EventsService:
         if err:
             return None, err
         return event, None
+
+    @staticmethod
+    def get_id_by_events_name(events_name: str):
+        events, err = EventsDao().get_id_by_name(events_name)
+        if err:
+            return None, err
+        return events, None

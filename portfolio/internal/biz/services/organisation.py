@@ -52,3 +52,10 @@ class OrganisationService:
         if err:
             return None, err
         return organisation, None
+
+    @staticmethod
+    def get_id_by_organisation_name(organisation_name: str):
+        organisation, err = OrganisationDao().get_id_by_org_name(organisation_name)
+        if err:
+            return None, err
+        return organisation, None

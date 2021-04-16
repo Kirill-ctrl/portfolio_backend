@@ -134,6 +134,7 @@ CREATE TABLE events(
     name VARCHAR(200) NOT NULL,
     date_event DATE NOT NULL,
     hours INTEGER NOT NULL,
+    skill VARCHAR(200) NOT NULL,
     organisation_id INTEGER REFERENCES organisation(id) ON DELETE CASCADE
 );
 
@@ -253,6 +254,7 @@ CREATE TABLE request_to_organisation(
     events_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
     children_id INTEGER REFERENCES children(id) ON DELETE CASCADE,
     status BOOLEAN DEFAULT FALSE
+    CONSTRAINT unique_request UNIQUE(parents_id, children_id, events_id)
 );
 
 -- -------------------------------------------------------------------------------

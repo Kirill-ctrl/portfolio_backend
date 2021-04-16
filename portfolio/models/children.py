@@ -48,3 +48,7 @@ class Children(AbstractModel):
     @property
     def date_born(self) -> date:
         return self.__date_born
+
+    @date_born.setter
+    def date_born(self, value: date):
+        self.__date_born = value

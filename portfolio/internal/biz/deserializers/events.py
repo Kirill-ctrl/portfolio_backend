@@ -34,7 +34,8 @@ class EventDeserializer(BaseDeserializer):
             type=event_dict.get('type'),
             name=event_dict.get('name'),
             date_event=event_dict.get('date_event'),
-            hours=event_dict.get('hours')
+            hours=event_dict.get('hours'),
+            skill=event_dict.get('skill')
         )
 
     @staticmethod
@@ -46,6 +47,7 @@ class EventDeserializer(BaseDeserializer):
                 name=list_events[i]['events_name'],
                 date_event=list_events[i]['events_date_event'],
                 hours=list_events[i]['events_hours'],
+                skill=list_events[i]['events_skill'],
                 organisation=Organisation(
                     id=list_events[i]['events_organisation_id']
                 )
@@ -61,6 +63,7 @@ class EventDeserializer(BaseDeserializer):
             name=event_dict['events_name'],
             date_event=event_dict['events_date_events'],
             hours=event_dict['events_hours'],
+            skill=event_dict['events_skill'],
             organisation=Organisation(
                 id=event_dict['events_organisation_id'],
             )
@@ -71,7 +74,7 @@ class EventDeserializer(BaseDeserializer):
         return Events(
             id=event_dict['events_id'],
             name=event_dict['events_name'],
-            date_event=event_dict['events_date_events'],
+            date_event=event_dict['events_date_event'],
             organisation=Organisation(
                 id=event_dict['events_organisation_id']
             )
@@ -84,5 +87,6 @@ class EventDeserializer(BaseDeserializer):
             type=row['events_type'],
             name=row['events_name'],
             date_event=row['events_date_event'],
-            hours=row['events_hours']
+            hours=row['events_hours'],
+            skill=row['events_skill']
         )

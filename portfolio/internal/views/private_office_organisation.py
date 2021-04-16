@@ -83,7 +83,7 @@ def delete_teacher(auth_account_main_id: int, organisation_id: int):
     return json.dumps(get_response_delete_teacher(teacher))
 
 
-@private_office_organisation.route('', methods=['GET'])
+@private_office_organisation.route('/', methods=['GET'])
 @required_auth_with_confirmed_email
 def main_page(auth_account_main_id: int):
     if request.method == 'GET':
@@ -103,7 +103,8 @@ def add_event(auth_account_main_id: int, organisation_id: int):
         errors = AddEventSchema().validate(dict(type=request.form['type'],
                                                 name=request.form['name'],
                                                 date_event=request.form['date_event'],
-                                                event_hours=request.form['event_hours']))
+                                                event_hours=request.form['hours'],
+                                                skill=request.form['skill']))
         if errors:
             return json.dumps(errors)
         event: Events = EventDeserializer.deserialize(request.form, DES_FROM_ADD_EVENT)

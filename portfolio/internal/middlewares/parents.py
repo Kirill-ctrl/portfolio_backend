@@ -35,7 +35,7 @@ def check_child_by_parent(func):
 
         list_children, err = ChildrenService.get_children_by_parents_id(children)
         if err:
-            return None, err
+            return json.dumps(err)
         response = func(*args, list_children=list_children, parent_id=list_children[0].parents.id, **kwargs)
         return response
     wrapper.__name__ = func.__name__
