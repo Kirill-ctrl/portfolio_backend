@@ -19,18 +19,6 @@ class RequestToOrganisationService:
         if err:
             return None, err
 
-        tuple_children_id = tuple([request.children.id for request in list_request_to_organisation])
-        print(tuple_children_id)
-        list_children, err = ChildrenDao().get_list_by_tuple_children_id(tuple_children_id)
-        if err:
-            return None, err
-
-        for req, child in list(zip(list_request_to_organisation, list_children)):
-            req.children.id = child.id
-            req.children.name = child.name
-            req.children.surname = child.surname
-            req.children.date_born = child.date_born
-
         return list_request_to_organisation, None
 
     @staticmethod
@@ -39,8 +27,8 @@ class RequestToOrganisationService:
         if err:
             return None, err
 
-        request_to_organisation.parents.account_main.is_email_sent = MailServer.send_email(EMAIL_ACCEPT_REQUEST,
-                                                                                           request_to_organisation.parents.account_main.email,
+        request_to_organisation.children.parents.account_main.is_email_sent = MailServer.send_email(EMAIL_ACCEPT_REQUEST,
+                                                                                           request_to_organisation.children.parents.account_main.email,
                                                                                            request_to_organisation.status)
 
         return request_to_organisation, None

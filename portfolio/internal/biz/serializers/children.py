@@ -7,6 +7,7 @@ from portfolio.models.children import Children
 SER_FOR_ADD_CHILD = 'ser-for-add-child'
 SER_FOR_DETAIL_CHILD = 'ser-for-detail-child'
 SER_FOR_GET_LIST_CHILDREN = 'ser-for-get-list-children'
+SER_FOR_GET_DETAIL_CHILDREN = 'ser-for-get-detail-children'
 
 
 class ChildrenSerializer(BaseSerializer):
@@ -19,6 +20,8 @@ class ChildrenSerializer(BaseSerializer):
             return cls._ser_for_detail_child
         elif format_ser == SER_FOR_GET_LIST_CHILDREN:
             return cls._ser_for_get_list_children
+        elif format_ser == SER_FOR_GET_DETAIL_CHILDREN:
+            return cls._ser_for_get_detail_children
         else:
             raise TypeError
 
@@ -60,4 +63,16 @@ class ChildrenSerializer(BaseSerializer):
                 }
                 for i in range(len(list_children))
             ]
+        }
+
+    @staticmethod
+    def _ser_for_get_detail_children(children: Children):
+        return {
+            'id': children.id,
+            'name': children.name,
+            'surname': children.surname,
+            'date_born': children.date_born,
+            'parents': {
+                'id': children.parents.id
+            }
         }

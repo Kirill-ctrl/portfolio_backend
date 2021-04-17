@@ -1,7 +1,7 @@
 from typing import List
 
 from portfolio.internal.biz.serializers.base_serializer import BaseSerializer
-from portfolio.internal.biz.serializers.children import ChildrenSerializer
+from portfolio.internal.biz.serializers.children import ChildrenSerializer, SER_FOR_DETAIL_CHILD
 from portfolio.models.children_organisation import ChildrenOrganisation
 
 SER_FOR_GET_LIST_LEARNERS = 'ser-for-get-list-learners'
@@ -19,12 +19,14 @@ class ChildrenOrganisationSerializer(BaseSerializer):
     @staticmethod
     def _ser_for_get_list_learners(list_learners: List[ChildrenOrganisation]):
         return {
-            'children': {
-                'id': list_learners[i].id,
-                'teacher': {
-                    'id': list_learners[i].teacher.id,
-                },
-                'children': ChildrenSerializer.serialize
-            }
-            for i in range(len(list_learners))
+            'children': [
+                {
+                    'id': list_learners[i].id,
+                    'teacher': {
+                        'id': list_learners[i].teacher.id,
+                    },
+                    'children': ChildrenSerializer.serialize(list_learners[i].children, SER_FOR_DETAIL_CHILD)
+                }
+                for i in range(len(list_learners))
+            ]
         }

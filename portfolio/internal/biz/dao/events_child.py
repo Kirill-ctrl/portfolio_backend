@@ -13,11 +13,11 @@ class EventsChildDao(BaseDao):
         sql = """   INSERT INTO events_child(children_organisation_id, events_id) VALUES
                     (%s, %s)
                     RETURNING id, created_at, edited_at;"""
-        with self.conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-            cur.execute(sql, (events_child.children_organisation.id,
-                              events_child.events.id))
-            row = cur.fetchone()
-            cur.close()
+        cur = self.conn.cursor(cursor_factory=extras.RealDictCursor)
+        cur.execute(sql, (events_child.children_organisation.id,
+                          events_child.events.id))
+        row = cur.fetchone()
+        cur.close()
         self.conn.commit()
         if not row:
             return None, "Я хз"
@@ -35,17 +35,19 @@ class EventsChildDao(BaseDao):
                         status = true
                     WHERE
                         children_organisation_id = %s AND events_id = %s
-                    RETURNING id;"""
+                    RETURNING id, status;"""
         with self.pool.getconn() as conn:
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
                 cur.execute(sql, (events_child.children_organisation.id,
                                   events_child.events.id))
                 row = cur.fetchone()
                 cur.close()
+                conn.commit()
             self.pool.putconn(conn)
         if not row:
             return None, "Ребенок не был добавлен в это событие"
         events_child.id = row['id']
+        events_child.status = row['status']
         return events_child, None
 
     def get_by_child_organisation_id_or_child_id(self,

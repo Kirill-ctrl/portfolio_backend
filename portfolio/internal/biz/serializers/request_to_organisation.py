@@ -58,9 +58,7 @@ class RequestToOrganisationSerializer(BaseSerializer):
                             'date_event': list_request_to_organisation[i].events.date_event
                         },
                         'children': {
-                            'id': list_request_to_organisation[i].children.id,
-                            'name': list_request_to_organisation[i].children.name,
-                            'surname': list_request_to_organisation[i].children.surname
+                            'id': list_request_to_organisation[i].children.id
                         }
                     }
                     for i in range(len(list_request_to_organisation))

@@ -14,7 +14,7 @@ from portfolio.internal.views.answers.account import get_response_register, get_
 from portfolio.models.account_main import AccountMain
 from portfolio.models.auth_code import AuthCode
 
-account = Blueprint('account', __name__, template_folder="templates/account", static_folder="static/account")
+account = Blueprint('account', __name__, template_folder="../../templates/account/", static_folder="../../static/account/")
 
 
 @account.route("/register", methods=['GET', 'POST'])
@@ -30,23 +30,19 @@ def register():
         account_main, errors = AuthService.register(account_main)
         if errors:
             return json.dumps(errors)
-        # response = Response(response=json.dumps(get_response_register(account_main)),
-        #                     status=200,
-        #                     mimetype='application/json')
-        # return render_template('account/register.html',
-        #                        context=response.response,
-        #                        status_code=response.status_code,
-        #                        mimetype=response.mimetype)
-        return json.dumps(get_response_register(account_main))
-    # return render_template('account/register.html')
-    return json.dumps("Method - POST")
+        response = Response(response=json.dumps(get_response_register(account_main)),
+                            status=200,
+                            mimetype='application/json')
+        return render_template('registration.html',
+                               context=response.response,
+                               status_code=response.status_code,
+                               mimetype=response.mimetype)
+    return render_template('registration.html', errors=None)
 
 
 @account.route('/auth/code', methods=['POST'])
 @required_auth
 def confirm_code(auth_account_main_id: int):
-    print(request.form['code'])
-    print(type(request.form['code']))
     validate_errors = ConfirmCodeSchema().validate(dict(code=request.form.get('code')))
     if validate_errors:
         return json.dumps(validate_errors)
@@ -92,8 +88,14 @@ def login():
         account_main, err = AuthService.auth_login(account_main)
         if err:
             return json.dumps(err)
-
-        return json.dumps(get_response_login(account_main))
+        response = Response(response=json.dumps(get_response_login(account_main)),
+                            status=200,
+                            mimetype='application/json')
+        return render_template('account/login.html',
+                               context=response.response,
+                               status_code=response.status_code,
+                               mimetype=response.mimetype)
+    return render_template('account/login.html', errors=None)
 
 
 @account.route('/recovery_password', methods=['GET', 'POST'])
@@ -108,5 +110,11 @@ def recovery_password():
         account_main, err = AuthService.recovery_password(account_main)
         if err:
             return json.dumps(err)
-
-        return json.dumps(get_response_recovery_password(account_main))
+        response = Response(response=json.dumps(get_response_recovery_password(account_main)),
+                            status=200,
+                            mimetype='application/json')
+        return render_template('account/password.html',
+                               context=response.response,
+                               status_code=response.status_code,
+                               mimetype=response.mimetype)
+    return render_template('account/password.html', errors=None)

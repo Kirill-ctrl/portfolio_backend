@@ -76,44 +76,24 @@ class ChildrenDao(BaseDao):
 
     def get_by_request_id(self, request_id):
         sql = """   SELECT
-                        id                          AS children_id,
-                        name                        AS children_name,
-                        surname                     AS children_surname,
-                        date_born                   AS children_date_born,
-                        parents_id                  AS children_parents_id,
+                        children.id                 AS children_id,
+                        children.name               AS children_name,
+                        children.surname            AS children_surname,
+                        children.date_born          AS children_date_born,
+                        children.parents_id         AS children_parents_id,
                         parents.account_main_id     AS parents_account_main_id
                     FROM
                         children
                     INNER JOIN 
                         parents ON parents.id = children.id
                     INNER JOIN
-                        request_to_organisation ON request_to_organisation.parents_id = partners.id
+                        request_to_organisation ON request_to_organisation.parents_id = parents.id
                     WHERE
-                        request_id = %s"""
-        with self.conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-            cur.execute(sql, (request_id,))
-            row = cur.fetchone()
-            cur.close()
+                        request_to_organisation.id = %s"""
+        cur = self.conn.cursor(cursor_factory=extras.RealDictCursor)
+        cur.execute(sql, (request_id,))
+        row = cur.fetchone()
+        cur.close()
         if not row:
             return None, "Такого запроса не существует"
         return ChildrenDeserialize.deserialize(row, DES_FROM_DB_INFO_CHILD_WITH_PARENTS), None
-
-    def get_list_by_tuple_children_id(self, tuple_children_id) -> Tuple[Optional[List[Children]], Optional[None]]:
-        sql = """   SELECT
-                        children.id                 AS children_id,
-                        children.name               AS children_name,
-                        children.surname            AS children_surname,
-                        children.date_born          AS children_date_born
-                    FROM
-                        children
-                    WHERE
-                        children.id IN %s
-                    ORDER BY 
-                        children.id"""
-        with self.pool.getconn() as conn:
-            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-                cur.execute(sql, (tuple_children_id,))
-                data = cur.fetchall()
-                cur.close()
-            self.pool.putconn(conn)
-        return [ChildrenDeserialize.deserialize(data[i], DES_FROM_DB_INFO_CHILDREN) for i in range(len(data))], None

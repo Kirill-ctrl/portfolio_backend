@@ -3,6 +3,7 @@ from flask import Blueprint, request, json
 from portfolio.internal.biz.deserializers.achievements import AchievementsDeserializer, DES_FROM_ADD_ACHIEVEMENT
 from portfolio.internal.biz.deserializers.events import EventDeserializer, DES_FROM_ADD_EVENT
 from portfolio.internal.biz.deserializers.teacher import TeacherDeserializer, DES_FOR_ADD_TEACHER, DES_FOR_EDIT_TEACHER
+from portfolio.internal.biz.serializers.utils import SetEncoder
 from portfolio.internal.biz.services.achievements import AchievementService
 from portfolio.internal.biz.services.children_organisation import ChildrenOrganisationService
 from portfolio.internal.biz.services.events import EventsService
@@ -169,7 +170,7 @@ def get_detail_children(children_org_id: int):
         if err:
             return json.dumps(err)
 
-        return json.dumps(get_response_detail_activity_child_organisation(list_activity_child))
+        return json.dumps(get_response_detail_activity_child_organisation(list_activity_child), cls=SetEncoder)
 
 
 @private_office_organisation.route('/learners/<int:children_org_id>/add_activity', methods=['POST', 'GET'])
@@ -191,15 +192,12 @@ def add_activity(auth_account_main_id: int, organisation_id: int, children_org_i
         if err:
             json.dumps(err)
         return json.dumps(get_response_add_activity(activity_child))
-        # TODO Берем через children_organisation инфу
-        # TODO Каким то чудным образом берем ачивку, если она есть, если нет - null
-        # TODO Херачим в events_child
         # TODO Как вариант берем account_main.email и отправляем, что у нас новая активность
 
 
 @private_office_organisation.route('/events', methods=['GET'])
 @get_org_id_and_acc_id_with_confirmed_email
-def get_list_events(organisation_id: int):
+def get_list_events(auth_account_main_id: int, organisation_id: int):
     if request.method == 'GET':
         list_events, err = EventsService.get_all_events_by_organisation_id(organisation_id)
         if err:
@@ -219,7 +217,7 @@ def detail_event(auth_account_main_id: int, organisation_id: int, events_id: int
 
 @private_office_organisation.route('events/<int:events_id>/add_achievement', methods=['GET', 'POST'])
 @get_org_id_and_acc_id_with_confirmed_email
-def add_achievement(organisation_id: int, events_id: int):
+def add_achievement(auth_account_main_id: int, organisation_id: int, events_id: int):
     if request.method == 'POST':
         errors = AddAchievementSchema().validate(dict(name=request.form['name'],
                                                       point=request.form['point'],
@@ -227,26 +225,9 @@ def add_achievement(organisation_id: int, events_id: int):
         if errors:
             return json.dumps(errors)
         achievement = AchievementsDeserializer.deserialize(request.form, DES_FROM_ADD_ACHIEVEMENT)
-        achievement.events.id = events_id
+        achievement.events = Events(id=events_id)
         achievement, err = AchievementService.add_achievement(achievement)
         if err:
             return json.dumps(err)
 
         return json.dumps(get_response_add_achievements(achievement))
-
-
-# @private_office_organisation.route('/add_learner', methods=['GET', 'POST'])
-# @get_teacher_id_and_org_id
-# def add_learner(auth_account_main_id: int, organisation_id: int):
-#     if request.method == 'POST':
-#         errors = AddChildrenSchema().validate(dict(name=request.form['name'],
-#                                                    surname=request.form['surname'],
-#                                                    date_born=request.form['date_born']))
-#         if errors:
-#             return json.dumps(errors)
-#
-#
-# @private_office_organisation.route('/detail_learners', methods=['GET'])
-# @get_teacher_id_and_org_id
-# def detail_learners(organisation_id: int, teacher_id: int):
-#     pass

@@ -8,6 +8,7 @@ class BaseDao:
     def __init__(self, conn=None) -> None:
         self.pool = Pg.get_pool_db()
         self.conn = conn
+        self.simple_connection = Pg.get_connection_db()
 
     def get_by_id(self, id: int):
         raise NotImplemented

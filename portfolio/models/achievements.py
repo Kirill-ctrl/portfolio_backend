@@ -24,6 +24,10 @@ class Achievements(AbstractModel):
     def events(self) -> Events:
         return self.__events
 
+    @events.setter
+    def events(self, value: Events):
+        self.__events = value
+
     @property
     def point(self) -> int:
         return self.__point

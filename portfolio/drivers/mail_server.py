@@ -82,7 +82,7 @@ class MailServer:
         yag = yagmail.SMTP(MAIL_FROM)
 
         to = address
-        body = 'Статус вашей заявки: '.join(message)
+        body = f'Статус вашей заявки: {message}'
         subject = "Статус заявки Portfolio"
 
         try:

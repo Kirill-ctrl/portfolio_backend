@@ -16,7 +16,7 @@ class AchievementsChildDao(BaseDao):
                         achievements.events_id  AS achievements_events_id,
                         achievements.name       AS achievements_name,
                         achievements.point      AS achievements_point,
-                        achievements.nomination AS achievements_nomination,
+                        achievements.nomination AS achievements_nomination
                     FROM
                         achievements_child
                     INNER JOIN
@@ -39,5 +39,5 @@ class AchievementsChildDao(BaseDao):
                 cur.close()
             self.pool.putconn(conn)
         if not data:
-            return None, 'Нет достижений'
+            return None, None
         return AchievementsChildDeserializer.deserialize(data, DES_FROM_DB_GET_ALL_ACHIV_BY_CHILD), None

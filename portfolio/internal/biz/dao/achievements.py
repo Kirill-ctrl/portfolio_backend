@@ -18,6 +18,7 @@ class AchievementsDao(BaseDao):
                                   achievement.nomination))
                 row = cur.fetchone()
                 cur.close()
+                conn.commit()
             self.pool.putconn(conn)
         if not row:
             return None, "Я вообще ничего не понимаю"

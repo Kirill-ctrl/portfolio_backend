@@ -61,7 +61,7 @@ class EventDeserializer(BaseDeserializer):
             id=event_dict['events_id'],
             type=event_dict['events_type'],
             name=event_dict['events_name'],
-            date_event=event_dict['events_date_events'],
+            date_event=event_dict['events_date_event'],
             hours=event_dict['events_hours'],
             skill=event_dict['events_skill'],
             organisation=Organisation(

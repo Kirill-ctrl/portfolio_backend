@@ -28,7 +28,7 @@ class EventsDao(BaseDao):
 
     def get_by_organisation_id(self, organisation_id: int):
         sql = """   SELECT 
-                        id                  AS events_id
+                        id                  AS events_id,
                         type                AS events_type,
                         name                AS events_name,
                         date_event          AS events_date_event,
@@ -47,11 +47,11 @@ class EventsDao(BaseDao):
             self.pool.putconn(conn)
         if not data:
             return None, "У этой организации нет событий"
-        return EventDeserializer.deserialize(data, DES_FROM_DB_FULL_EVENTS_BY_ORG_ID)
+        return EventDeserializer.deserialize(data, DES_FROM_DB_FULL_EVENTS_BY_ORG_ID), None
 
     def get_by_id(self, event_id: int):
         sql = """   SELECT 
-                        id                  AS events_id
+                        id                  AS events_id,
                         type                AS events_type,
                         name                AS events_name,
                         date_event          AS events_date_event,
@@ -70,7 +70,7 @@ class EventsDao(BaseDao):
             self.pool.putconn(conn)
         if not row:
             return None, "Данное событие не существует"
-        return EventDeserializer.deserialize(row, DES_FROM_DB_GET_DETAIL_EVENT)
+        return EventDeserializer.deserialize(row, DES_FROM_DB_GET_DETAIL_EVENT), None
 
     def get_focus_by_sort_date(self, result_sort_focus: datetime.date, children_id: int):
         sql = """   SELECT

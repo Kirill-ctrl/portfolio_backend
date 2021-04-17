@@ -14,11 +14,12 @@ class ChildrenOrganisationDao(BaseDao):
         sql = """   INSERT INTO children_organisation(teacher_id, children_id) VALUES
                     (%s, %s)
                     RETURNING id, created_at, edited_at;"""
-        with self.conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-            cur.execute(sql, (children_organisation.teacher.id, children_organisation.children.id))
-            row = cur.fetchone()
-            cur.close()
-            self.conn.commit()
+        cur = self.conn.cursor(cursor_factory=extras.RealDictCursor)
+        cur.execute(sql, (0,  # children_organisation.teacher.id,
+                          children_organisation.children.id))
+        row = cur.fetchone()
+        cur.close()
+        self.conn.commit()
         children_organisation.id = row['id']
         children_organisation.created_at = row['created_at']
         children_organisation.edited_at = row['edited_at']
@@ -26,12 +27,12 @@ class ChildrenOrganisationDao(BaseDao):
 
     def get_all_by_organisation_id(self, organisation_id: int):
         sql = """   SELECT 
-                        id                  AS children_organisation_id,
-                        teacher_id          AS children_organisation_teacher_id,
-                        children_id         AS children_id,
-                        children.name       AS children_name,
-                        children.surname    AS children_surname,
-                        children.date_born  AS children_date_born
+                        children_organisation.id    AS children_organisation_id,
+                        teacher_id                  AS children_organisation_teacher_id,
+                        children_id                 AS children_id,
+                        children.name               AS children_name,
+                        children.surname            AS children_surname,
+                        children.date_born          AS children_date_born
                     FROM
                         children_organisation
                     INNER JOIN

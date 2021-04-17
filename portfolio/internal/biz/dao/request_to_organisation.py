@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+import psycopg2
 from psycopg2 import extras
 
 from portfolio.internal.biz.dao.account_main import AccountMainDao
@@ -77,9 +78,10 @@ class RequestToOrganisationDao(BaseDao):
                         request_to_organisation
                     WHERE
                         id = %s;"""
-        with self.conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-            cur.execute(sql, (request_to_organisation.id,))
-            row = cur.fetchone()
+        cur = self.conn.cursor(cursor_factory=extras.RealDictCursor)
+        cur.execute(sql, (request_to_organisation.id,))
+        row = cur.fetchone()
+        cur.close()
         if not row:
             return None, "Такого события не существует"
         request_to_organisation.events = Events(id=row['events_id'])
@@ -92,59 +94,63 @@ class RequestToOrganisationDao(BaseDao):
                     WHERE
                         id = %s
                     RETURNING status;"""
-        with self.conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-            cur.execute(sql, (request_to_organisation.id,))
-            row = cur.fetchone()
-            cur.close()
+        cur = self.conn.cursor(cursor_factory=extras.RealDictCursor)
+        cur.execute(sql, (request_to_organisation.id,))
+        row = cur.fetchone()
+        cur.close()
+        self.conn.commit()
         if not row['status']:
             return None, "хммммм"
         request_to_organisation.status = row['status']
         return request_to_organisation, None
 
     def accept_request(self, request_to_organisation: RequestToOrganisation) -> Tuple[Optional[RequestToOrganisation], Optional[str or None]]:
-        with self.pool.getconn() as conn:
-            try:
-                request_to_organisation, err = RequestToOrganisationDao(conn).get_event_id(request_to_organisation)
-                if err:
-                    return None, err
+        conn = self.simple_connection
+        try:
+            request_to_organisation, err = RequestToOrganisationDao(conn).get_event_id(request_to_organisation)
+            if err:
+                return None, err
 
-                children, err = ChildrenDao(conn).get_by_request_id(request_to_organisation.id)
-                if err:
-                    return None, err
+            children, err = ChildrenDao(conn).get_by_request_id(request_to_organisation.id)
+            if err:
+                return None, err
 
-                request_to_organisation.children = children
+            request_to_organisation.children = children
 
-                parents_account_main, err = AccountMainDao(conn).get_email_by_id(children.parents.account_main.id)
-                if err:
-                    return None, err
+            parents_account_main, err = AccountMainDao(conn).get_email_by_id_into_transaction(children.parents.account_main.id)
+            if err:
+                return None, err
 
-                request_to_organisation.parents.account_main = parents_account_main
+            request_to_organisation.children.parents.account_main = parents_account_main
 
-                # TODO ДОБАВИТЬ TEACHER_ID
-                children_organisation, err = ChildrenOrganisationDao(conn).add(request_to_organisation.children)
-                if err:
-                    return None, err
+            children_organisation = ChildrenOrganisation(children=request_to_organisation.children,
+                                                         teacher=None)
 
-                events_child = EventsChild(events=Events(
-                    id=request_to_organisation.events.id
+            # TODO ДОБАВИТЬ TEACHER_ID
+            children_organisation, err = ChildrenOrganisationDao(conn).add(children_organisation)
+            if err:
+                return None, err
 
-                ),
-                    children_organisation=ChildrenOrganisation(
-                        id=children_organisation.id,
-                    )
+            events_child = EventsChild(events=Events(
+                id=request_to_organisation.events.id
+
+            ),
+                children_organisation=ChildrenOrganisation(
+                    id=children_organisation.id,
                 )
+            )
 
-                events_child, err = EventsChildDao(conn).add_by_request(events_child)
-                if err:
-                    return None, err
+            events_child, err = EventsChildDao(conn).add_by_request(events_child)
+            if err:
+                return None, err
 
-                request_to_organisation, err = RequestToOrganisationDao(conn).update_status(request_to_organisation)
-                if err:
-                    return None, err
+            request_to_organisation, err = RequestToOrganisationDao(conn).update_status(request_to_organisation)
+            if err:
+                return None, err
 
-                return request_to_organisation, None
-            except Exception as e:
-                conn.roolback()
-                raise e
-            finally:
-                self.pool.putconn(conn)
+            return request_to_organisation, None
+        except (Exception, psycopg2.DatabaseError) as error :
+            conn.roolback()
+            raise error
+        finally:
+            conn.close()
